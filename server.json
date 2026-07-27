@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.mouseos/yahoo-search-mcp",
+  "title": "Yahoo! JAPAN Search MCP",
+  "description": "Search Yahoo! JAPAN — web, images, video, news, real-time X posts and Chiebukuro Q&A. Zero-config, no API key, no login.",
+  "repository": {
+    "url": "https://github.com/mouseos/Yahoo-Japan-Search-MCP",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.0/yahoo-search-mcp-v0.1.0-win32-x64.mcpb",
+      "fileSha256": "",
+      "transport": {
+        "type": "stdio"
+      },
+      "environment_variables": [],
+      "supported_platforms": ["win32"]
+    },
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.0/yahoo-search-mcp-v0.1.0-macos-arm64.mcpb",
+      "fileSha256": "",
+      "transport": {
+        "type": "stdio"
+      },
+      "environment_variables": [],
+      "supported_platforms": ["darwin"]
+    },
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.0/yahoo-search-mcp-v0.1.0-linux-x64.mcpb",
+      "fileSha256": "",
+      "transport": {
+        "type": "stdio"
+      },
+      "environment_variables": [],
+      "supported_platforms": ["linux"]
+    }
+  ]
+}

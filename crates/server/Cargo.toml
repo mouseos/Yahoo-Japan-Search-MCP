@@ -1,0 +1,17 @@
+[package]
+name = "yahoo-search-mcp-server"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[[bin]]
+name = "yahoo-search-mcp"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+
+yahoo-search-mcp-provider = { path = "../providers/yahoo_search" }

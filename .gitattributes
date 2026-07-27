@@ -1,0 +1,9 @@
+# Normalise to LF in the repository so the bash steps in the GitHub Actions
+# workflows are never checked out with CRLF on a runner.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.mcpb binary
+*.zip binary

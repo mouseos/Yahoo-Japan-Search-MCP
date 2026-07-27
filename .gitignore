@@ -1,0 +1,16 @@
+/target
+**/target
+dist/
+*.mcpb
+*.zip
+
+# Local scratch
+smoke_out.jsonl
+*.log
+.DS_Store
+Thumbs.db
+
+# Editor / agent state
+.idea/
+.vscode/
+.claude/worktrees/
