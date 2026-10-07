@@ -1,13 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-  schedule:
-    # Yahoo can change its page markup at any time; a daily live run surfaces
-    # a broken parser before users hit it.
-    - cron: '17 3 * * *'
   workflow_dispatch:
 
 env:
