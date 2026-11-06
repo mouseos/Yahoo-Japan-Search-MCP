@@ -70,6 +70,61 @@ Requires Rust 1.80+ (for `std::sync::LazyLock`). On Linux the launcher additiona
 needs `libfontconfig1-dev libxkbcommon-dev libgtk-3-dev`; the server itself has no
 system dependencies.
 
+## Use as a Rust library
+
+The search logic lives in the provider crate (package `yahoo-search-mcp-provider`,
+imported under its lib name `yahoo_search`), so you can call it directly from
+your own Rust program without the MCP server. No API key, login or
+configuration — anonymous, exactly like the MCP server.
+
+```toml
+[dependencies]
+# From GitHub
+yahoo_search = { git = "https://github.com/mouseos/Yahoo-Japan-Search-MCP", package = "yahoo-search-mcp-provider" }
+# From a local checkout
+# yahoo_search = { path = "../Yahoo-Japan-Search-MCP/crates/providers/yahoo_search", package = "yahoo-search-mcp-provider" }
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+```
+
+```rust
+use yahoo_search::YahooSearchClient;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let client = YahooSearchClient::new();
+    let result = client.web_search("味噌ラーメン 作り方", 1, 5, "", "").await?;
+    for item in &result.items {
+        println!("{} — {}", item.title, item.url);
+    }
+    let suggest = client.suggest_keywords("ラーメン", 10).await?;
+    for s in &suggest.suggestions {
+        println!("{}", s.keyword);
+    }
+    Ok(())
+}
+```
+
+Public API (everything is importable from the crate root):
+
+| Kind | Names |
+|---|---|
+| Client | `YahooSearchClient` (`web_search` / `image_search` / `video_search` / `news_search` / `realtime_search` / `chiebukuro_search` / `suggest_keywords`, all returning `anyhow::Result`) |
+| Shared result types | `SearchResult<T>`, `PROVIDER`, `verticals()` |
+| Per-vertical item types | `WebItem`, `ImageItem` / `ImageSize`, `VideoItem`, `NewsItem`, `RealtimeItem`, `ChiebukuroItem`, `SuggestResult` / `Suggestion` |
+| Offline helpers | `extract_next_data` / `extract_preloaded_state` / `extract_window_props` (payload extraction from saved page HTML), `clean_text`, `decode_entities`, `urlencode` |
+
+Result types derive serde `Serialize` / `Deserialize`, so results can be
+stored as JSON and read back. A network-free example lives in
+`crates/providers/yahoo_search/examples/offline_basics.rs`, and
+`crates/providers/yahoo_search/tests/library_api.rs` exercises the API
+exactly as an external user would.
+
+When a search fails through the MCP server, the tool result is returned as
+`{provider, ok:false, error:{kind, message}}` (the form shared with
+Baidu_MCP). Argument errors (such as a missing query) still surface as MCP
+`isError` results, as before.
+
 ## Examples
 
 Things to ask an agent:

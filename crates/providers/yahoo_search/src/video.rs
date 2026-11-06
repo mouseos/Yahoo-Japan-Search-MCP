@@ -11,6 +11,7 @@ const BASE: &str = "https://search.yahoo.co.jp/video/search";
 const REFERER: &str = "https://search.yahoo.co.jp/";
 const PER_PAGE: i64 = 20;
 
+/// One video result across YouTube, Instagram, TikTok, Niconico and others.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VideoItem {
     pub id: String,
@@ -32,6 +33,8 @@ pub struct VideoItem {
 }
 
 impl YahooSearchClient {
+    /// Search the video index. 20 results per page; `page` is 1-based and
+    /// `limit` is clamped to the page size.
     pub async fn video_search(
         &self,
         query: &str,

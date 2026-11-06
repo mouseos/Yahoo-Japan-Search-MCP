@@ -15,6 +15,7 @@ const REFERER: &str = "https://www.yahoo.co.jp/";
 /// Yahoo returns 10 organic results per page and paginates by 1-based offset.
 const PER_PAGE: i64 = 10;
 
+/// One organic web result: rank, title, destination URL and snippet.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebItem {
     pub rank: i64,

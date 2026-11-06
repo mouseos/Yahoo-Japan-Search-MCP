@@ -373,6 +373,13 @@ mod tests {
 
     /// An unsupported `vd` value is accepted by the URL and ignored, so assert
     /// each advertised window actually shrinks the result set.
+    ///
+    /// The windows are compared against each other, not against the
+    /// unfiltered search: since 2026-11 the unfiltered pager's `hits` is a
+    /// small finite count (~98 for this query, with at most 8 pages), while
+    /// the `vd` windows still report classic web totals (year 114M, week
+    /// 23.9M, day 4.05M — measured 2026-11-06). Comparing a window against
+    /// the unfiltered count therefore fails even though the filter works.
     #[tokio::test]
     async fn e2e_web_search_updated_filter_is_applied() {
         let client = YahooSearchClient::new();
@@ -381,7 +388,7 @@ mod tests {
         let all = call_tool(&client, "yahoo_web_search", json!({"query": "生成AI"})).await;
         assert!(hits(&all) > 0, "unfiltered search reported no hits: {all}");
 
-        let mut previous = hits(&all);
+        let mut previous = i64::MAX;
         for window in ["year", "week", "day"] {
             let r = call_tool(
                 &client,
@@ -389,6 +396,7 @@ mod tests {
                 json!({"query": "生成AI", "updated": window}),
             )
             .await;
+            assert!(hits(&r) > 0, "updated={window} reported no hits: {r}");
             assert!(
                 hits(&r) < previous,
                 "updated={window} did not narrow results ({} vs {previous}) — the filter is being ignored",

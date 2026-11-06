@@ -3,6 +3,8 @@ name = "yahoo-search-mcp-provider"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+description = "Yahoo! JAPAN search client library (web, image, video, news, realtime, Chiebukuro, suggest) — no API key or login required. Imported as `yahoo_search`; also powers the Yahoo-Japan-Search-MCP server."
+repository = "https://github.com/mouseos/Yahoo-Japan-Search-MCP"
 
 [lib]
 name = "yahoo_search"

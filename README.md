@@ -70,6 +70,58 @@ Rust 1.80以上が必要です（`std::sync::LazyLock` のため）。Linuxで�
 `libfontconfig1-dev libxkbcommon-dev libgtk-3-dev` が追加で必要です。サーバー本体に
 システム依存はありません。
 
+## Rustライブラリとして使う
+
+検索ロジックは provider crate（package名 `yahoo-search-mcp-provider`、import名は
+lib名の `yahoo_search`）にあり、MCPサーバーを介さず自分のRustプログラムから
+そのまま使えます。APIキー・ログイン・設定は不要で、MCP版と同じく匿名で動きます。
+
+```toml
+[dependencies]
+# GitHubから
+yahoo_search = { git = "https://github.com/mouseos/Yahoo-Japan-Search-MCP", package = "yahoo-search-mcp-provider" }
+# ローカルチェックアウトから
+# yahoo_search = { path = "../Yahoo-Japan-Search-MCP/crates/providers/yahoo_search", package = "yahoo-search-mcp-provider" }
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+```
+
+```rust
+use yahoo_search::YahooSearchClient;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let client = YahooSearchClient::new();
+    let result = client.web_search("味噌ラーメン 作り方", 1, 5, "", "").await?;
+    for item in &result.items {
+        println!("{} — {}", item.title, item.url);
+    }
+    let suggest = client.suggest_keywords("ラーメン", 10).await?;
+    for s in &suggest.suggestions {
+        println!("{}", s.keyword);
+    }
+    Ok(())
+}
+```
+
+公開API（すべて crate ルートから import できます）:
+
+| 種類 | 名前 |
+|---|---|
+| クライアント | `YahooSearchClient`（`web_search` / `image_search` / `video_search` / `news_search` / `realtime_search` / `chiebukuro_search` / `suggest_keywords`、戻り値は `anyhow::Result`） |
+| 共通の結果型 | `SearchResult<T>`、`PROVIDER`、`verticals()` |
+| 各検索の結果型 | `WebItem`、`ImageItem` / `ImageSize`、`VideoItem`、`NewsItem`、`RealtimeItem`、`ChiebukuroItem`、`SuggestResult` / `Suggestion` |
+| オフライン用ヘルパー | `extract_next_data` / `extract_preloaded_state` / `extract_window_props`（保存したページHTMLからペイロード抽出）、`clean_text`、`decode_entities`、`urlencode` |
+
+結果型は serde の `Serialize` / `Deserialize` に対応し、JSONへの保存と読み戻しが
+できます。ネットワーク不要の利用例が
+`crates/providers/yahoo_search/examples/offline_basics.rs` に、外部利用の形そのままの
+テストが `crates/providers/yahoo_search/tests/library_api.rs` にあります。
+
+なお、MCPサーバー経由で検索が失敗した場合は、ツール結果として
+`{provider, ok:false, error:{kind, message}}` の形で返ります（Baidu_MCPと共通の形式）。
+引数の誤り（クエリ未指定など）は従来どおり MCP の `isError` で返ります。
+
 ## 使用例
 
 エージェントへの指示例:

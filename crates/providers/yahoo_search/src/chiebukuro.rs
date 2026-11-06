@@ -11,6 +11,7 @@ const BASE: &str = "https://chiebukuro.yahoo.co.jp/search";
 const REFERER: &str = "https://chiebukuro.yahoo.co.jp/";
 const PER_PAGE: i64 = 10;
 
+/// One Yahoo! Chiebukuro question, with its state and answer/view counts.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChiebukuroItem {
     pub id: String,
@@ -27,7 +28,7 @@ pub struct ChiebukuroItem {
     pub updated_at: Option<String>,
     pub answer_count: i64,
     pub view_count: i64,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<String>,
 }
 
@@ -44,6 +45,9 @@ fn status_param(status: &str) -> Option<&'static str> {
 }
 
 impl YahooSearchClient {
+    /// Search Yahoo! Chiebukuro Q&A. 10 results per page; `page` is 1-based.
+    /// `status` filters by question state: `"open"`, `"vote"` or `"solved"`
+    /// (anything else means all states).
     pub async fn chiebukuro_search(
         &self,
         query: &str,

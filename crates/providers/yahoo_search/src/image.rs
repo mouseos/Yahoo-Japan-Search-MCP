@@ -11,6 +11,8 @@ const BASE: &str = "https://search.yahoo.co.jp/image/search";
 const REFERER: &str = "https://search.yahoo.co.jp/";
 const PER_PAGE: i64 = 20;
 
+/// One rendition of an image (original, Yahoo-cached copy or thumbnail)
+/// with its pixel dimensions when Yahoo reports them.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ImageSize {
     pub url: String,
@@ -20,6 +22,7 @@ pub struct ImageSize {
     pub height: Option<i64>,
 }
 
+/// One image result, with the page it was found on and its renditions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ImageItem {
     pub id: String,
@@ -42,6 +45,8 @@ pub struct ImageItem {
 }
 
 impl YahooSearchClient {
+    /// Search the image index. 20 results per page; `page` is 1-based and
+    /// `limit` is clamped to the page size.
     pub async fn image_search(
         &self,
         query: &str,

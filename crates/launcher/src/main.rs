@@ -70,7 +70,7 @@ fn setup_system_fonts(ctx: &egui::Context) {
     if let Some((data, idx)) = source
         .select_best_match(&[FamilyName::SansSerif], &props)
         .ok()
-        .and_then(&load)
+        .and_then(load)
     {
         add(ctx, "sans", data, idx, true);
     }
@@ -91,7 +91,7 @@ fn setup_system_fonts(ctx: &egui::Context) {
         if let Some((data, idx)) = source
             .select_best_match(&[FamilyName::Title(name.to_string())], &props)
             .ok()
-            .and_then(&load)
+            .and_then(load)
         {
             add(ctx, "cjk", data, idx, false);
             break;

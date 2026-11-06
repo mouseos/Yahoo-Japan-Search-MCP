@@ -16,6 +16,7 @@ const BASE: &str = "https://news.yahoo.co.jp/search";
 const REFERER: &str = "https://news.yahoo.co.jp/";
 const MAX_ITEMS: i64 = 60;
 
+/// One Yahoo! News article result, with publisher and publish time.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewsItem {
     pub id: String,
@@ -27,7 +28,7 @@ pub struct NewsItem {
     pub published_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub thumbnail: Option<String>,
@@ -36,6 +37,9 @@ pub struct NewsItem {
 }
 
 impl YahooSearchClient {
+    /// Search Yahoo! News articles. Yahoo returns a single server-rendered
+    /// batch of up to 60 articles and does not support offset paging, so
+    /// there is no `page` argument; `limit` slices the batch.
     pub async fn news_search(&self, query: &str, limit: i64) -> Result<SearchResult<NewsItem>> {
         let limit = clamp_limit(limit, MAX_ITEMS);
 

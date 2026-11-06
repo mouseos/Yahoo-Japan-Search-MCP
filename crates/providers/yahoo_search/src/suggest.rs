@@ -25,16 +25,20 @@ const FALLBACK_APPID: &str = "dj0zaiZpPVU5MGlSOUZ4cHVLbCZzPWNvbnN1bWVyc2VjcmV0Jn
 static APPID_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#""appid"\s*:\s*"([A-Za-z0-9_\-]+)""#).unwrap());
 
+/// One autocomplete suggestion, with the web-search URL for that keyword.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Suggestion {
     pub keyword: String,
     pub search_url: String,
 }
 
+/// Response envelope for [`YahooSearchClient::suggest_keywords`].
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SuggestResult {
-    pub provider: &'static str,
-    pub vertical: &'static str,
+    // Owned strings, like `SearchResult`: `&'static str` here would make the
+    // result impossible for downstream users to deserialise back.
+    pub provider: String,
+    pub vertical: String,
     pub ok: bool,
     pub query: String,
     pub count: usize,
@@ -42,6 +46,8 @@ pub struct SuggestResult {
 }
 
 impl YahooSearchClient {
+    /// Get keyword autocomplete suggestions for a (partial) query.
+    /// `limit` is clamped to 20. An empty query is an error.
     pub async fn suggest_keywords(&self, query: &str, limit: i64) -> Result<SuggestResult> {
         let query = query.trim();
         if query.is_empty() {
@@ -81,8 +87,8 @@ impl YahooSearchClient {
             .unwrap_or_default();
 
         Ok(SuggestResult {
-            provider: crate::PROVIDER,
-            vertical: "suggest",
+            provider: crate::PROVIDER.to_string(),
+            vertical: "suggest".to_string(),
             ok: true,
             query: query.to_string(),
             count: suggestions.len(),

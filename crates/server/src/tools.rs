@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use serde_json::{json, Value};
 
-use yahoo_search::YahooSearchClient;
+use yahoo_search::{YahooSearchClient, PROVIDER};
 
 // ── Argument helpers ──
 
@@ -166,74 +166,132 @@ pub fn tool_definitions() -> Vec<Value> {
 
 // ── Dispatch ──
 
+// ── Error form (unified with Baidu_MCP) ──
+//
+// A search that *ran* but failed on Yahoo's side (HTTP error, timeout, a
+// page layout change, …) is reported as a structured tool result —
+// `{provider, ok:false, vertical, error:{kind, message}}` — the same form
+// Baidu_MCP uses, so agents can branch on `ok` uniformly across search
+// MCPs. Argument errors (missing query) and unknown tools are not search
+// failures: they still surface as MCP `isError` results via `Err` here.
+// Successful results keep their existing shape untouched.
+
+/// Classify a provider error into a stable `kind` string.
+fn error_kind(e: &anyhow::Error) -> &'static str {
+    for cause in e.chain() {
+        if let Some(re) = cause.downcast_ref::<reqwest::Error>() {
+            if re.is_timeout() {
+                return "timeout";
+            }
+            if re.is_connect() {
+                return "connection_error";
+            }
+            if re.is_status() {
+                return "http_error";
+            }
+            if re.is_decode() || re.is_body() {
+                return "parse_error";
+            }
+            return "http_error";
+        }
+    }
+    if e.to_string()
+        .contains("not found (Yahoo page layout may have changed)")
+    {
+        "parse_error"
+    } else {
+        "search_error"
+    }
+}
+
+/// The unified structured error result for a failed search.
+fn error_result(vertical: &str, e: anyhow::Error) -> Value {
+    json!({
+        "provider": PROVIDER,
+        "ok": false,
+        "vertical": vertical,
+        "error": {
+            "kind": error_kind(&e),
+            "message": e.to_string(),
+        }
+    })
+}
+
 pub async fn dispatch(name: &str, args: &Value, client: &YahooSearchClient) -> Result<Value> {
     match name {
-        "yahoo_web_search" => {
-            let result = client
-                .web_search(
-                    &query_param(args)?,
-                    int_param(args, "page", 1),
-                    int_param(args, "limit", 10),
-                    &str_param(args, "updated"),
-                    &str_param(args, "site"),
-                )
-                .await?;
-            Ok(serde_json::to_value(result)?)
-        }
-        "yahoo_image_search" => {
-            let result = client
-                .image_search(
-                    &query_param(args)?,
-                    int_param(args, "page", 1),
-                    int_param(args, "limit", 20),
-                )
-                .await?;
-            Ok(serde_json::to_value(result)?)
-        }
-        "yahoo_video_search" => {
-            let result = client
-                .video_search(
-                    &query_param(args)?,
-                    int_param(args, "page", 1),
-                    int_param(args, "limit", 20),
-                )
-                .await?;
-            Ok(serde_json::to_value(result)?)
-        }
-        "yahoo_news_search" => {
-            let result = client
-                .news_search(&query_param(args)?, int_param(args, "limit", 20))
-                .await?;
-            Ok(serde_json::to_value(result)?)
-        }
-        "yahoo_realtime_search" => {
-            let result = client
-                .realtime_search(
-                    &query_param(args)?,
-                    int_param(args, "page", 1),
-                    int_param(args, "limit", 20),
-                    &str_param(args, "sort"),
-                )
-                .await?;
-            Ok(serde_json::to_value(result)?)
-        }
-        "yahoo_chiebukuro_search" => {
-            let result = client
-                .chiebukuro_search(
-                    &query_param(args)?,
-                    int_param(args, "page", 1),
-                    int_param(args, "limit", 10),
-                    &str_param(args, "status"),
-                )
-                .await?;
-            Ok(serde_json::to_value(result)?)
-        }
-        "yahoo_suggest_keywords" => {
-            let result = client
-                .suggest_keywords(&query_param(args)?, int_param(args, "limit", 10))
-                .await?;
-            Ok(serde_json::to_value(result)?)
-        }
+        "yahoo_web_search" => match client
+            .web_search(
+                &query_param(args)?,
+                int_param(args, "page", 1),
+                int_param(args, "limit", 10),
+                &str_param(args, "updated"),
+                &str_param(args, "site"),
+            )
+            .await
+        {
+            Ok(result) => Ok(serde_json::to_value(result)?),
+            Err(e) => Ok(error_result("web", e)),
+        },
+        "yahoo_image_search" => match client
+            .image_search(
+                &query_param(args)?,
+                int_param(args, "page", 1),
+                int_param(args, "limit", 20),
+            )
+            .await
+        {
+            Ok(result) => Ok(serde_json::to_value(result)?),
+            Err(e) => Ok(error_result("image", e)),
+        },
+        "yahoo_video_search" => match client
+            .video_search(
+                &query_param(args)?,
+                int_param(args, "page", 1),
+                int_param(args, "limit", 20),
+            )
+            .await
+        {
+            Ok(result) => Ok(serde_json::to_value(result)?),
+            Err(e) => Ok(error_result("video", e)),
+        },
+        "yahoo_news_search" => match client
+            .news_search(&query_param(args)?, int_param(args, "limit", 20))
+            .await
+        {
+            Ok(result) => Ok(serde_json::to_value(result)?),
+            Err(e) => Ok(error_result("news", e)),
+        },
+        "yahoo_realtime_search" => match client
+            .realtime_search(
+                &query_param(args)?,
+                int_param(args, "page", 1),
+                int_param(args, "limit", 20),
+                &str_param(args, "sort"),
+            )
+            .await
+        {
+            Ok(result) => Ok(serde_json::to_value(result)?),
+            Err(e) => Ok(error_result("realtime", e)),
+        },
+        "yahoo_chiebukuro_search" => match client
+            .chiebukuro_search(
+                &query_param(args)?,
+                int_param(args, "page", 1),
+                int_param(args, "limit", 10),
+                &str_param(args, "status"),
+            )
+            .await
+        {
+            Ok(result) => Ok(serde_json::to_value(result)?),
+            Err(e) => Ok(error_result("chiebukuro", e)),
+        },
+        "yahoo_suggest_keywords" => match client
+            .suggest_keywords(&query_param(args)?, int_param(args, "limit", 10))
+            .await
+        {
+            Ok(result) => Ok(serde_json::to_value(result)?),
+            Err(e) => Ok(error_result("suggest", e)),
+        },
         "yahoo_list_verticals" => Ok(yahoo_search::verticals()),
         other => Err(anyhow!("Unknown tool: {other}")),
     }
@@ -256,6 +314,24 @@ mod tests {
         assert_eq!(int_param(&json!({"limit": "5"}), "limit", 10), 5);
         assert_eq!(int_param(&json!({"limit": 3}), "limit", 10), 3);
         assert_eq!(int_param(&json!({}), "limit", 10), 10);
+    }
+
+    #[test]
+    fn error_result_uses_the_unified_form() {
+        let v = error_result("web", anyhow!("boom"));
+        assert_eq!(v["provider"], "yahoo_japan");
+        assert_eq!(v["ok"], false);
+        assert_eq!(v["vertical"], "web");
+        assert_eq!(v["error"]["kind"], "search_error");
+        assert_eq!(v["error"]["message"], "boom");
+    }
+
+    #[test]
+    fn error_kind_classifies_layout_changes_as_parse_error() {
+        let e = anyhow!("__NEXT_DATA__ block not found (Yahoo page layout may have changed)");
+        assert_eq!(error_kind(&e), "parse_error");
+        let v = error_result("news", e);
+        assert_eq!(v["error"]["kind"], "parse_error");
     }
 
     #[test]

@@ -13,5 +13,8 @@ tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 anyhow = { workspace = true }
+# Used directly in tools.rs to classify provider errors into the unified
+# `{kind, message}` error form (timeout / connection_error / http_error / …).
+reqwest = { workspace = true }
 
 yahoo-search-mcp-provider = { path = "../providers/yahoo_search" }

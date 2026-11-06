@@ -12,6 +12,7 @@ const BASE: &str = "https://search.yahoo.co.jp/realtime/search";
 const REFERER: &str = "https://search.yahoo.co.jp/realtime";
 const PER_PAGE: i64 = 40;
 
+/// One X (Twitter) post found by real-time search, with engagement counts.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RealtimeItem {
     pub id: String,
@@ -27,9 +28,9 @@ pub struct RealtimeItem {
     pub reply_count: i64,
     pub repost_count: i64,
     pub like_count: i64,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub hashtags: Vec<String>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub media: Vec<String>,
 }
 
@@ -42,6 +43,8 @@ fn sort_param(sort: &str) -> Option<&'static str> {
 }
 
 impl YahooSearchClient {
+    /// Search real-time X (Twitter) posts. 40 results per page; `page` is
+    /// 1-based. `sort` is `"recent"` (default) or `"popular"`.
     pub async fn realtime_search(
         &self,
         query: &str,
