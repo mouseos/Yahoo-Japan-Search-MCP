@@ -7,11 +7,11 @@
     "url": "https://github.com/mouseos/Yahoo-Japan-Search-MCP",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.0/yahoo-search-mcp-v0.1.0-win32-x64.mcpb",
+      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.1/yahoo-search-mcp-v0.1.1-win32-x64.mcpb",
       "fileSha256": "",
       "transport": {
         "type": "stdio"
@@ -21,7 +21,7 @@
     },
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.0/yahoo-search-mcp-v0.1.0-macos-arm64.mcpb",
+      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.1/yahoo-search-mcp-v0.1.1-macos-arm64.mcpb",
       "fileSha256": "",
       "transport": {
         "type": "stdio"
@@ -31,7 +31,7 @@
     },
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.0/yahoo-search-mcp-v0.1.0-linux-x64.mcpb",
+      "identifier": "https://github.com/mouseos/Yahoo-Japan-Search-MCP/releases/download/v0.1.1/yahoo-search-mcp-v0.1.1-linux-x64.mcpb",
       "fileSha256": "",
       "transport": {
         "type": "stdio"

@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.3",
   "name": "yahoo-search-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Search Yahoo! JAPAN — web, images, video, news, real-time X posts and Chiebukuro Q&A. Zero-config, no API key, no login.",
   "display_name": "Yahoo! JAPAN Search MCP",
   "author": {

@@ -4852,7 +4852,7 @@ checksum = "3ae8337f8a065cfc972643663ea4279e04e7256de865aa66fe25cec5fb912d3f"
 
 [[package]]
 name = "yahoo-search-mcp-launcher"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "eframe",
  "font-kit",
@@ -4862,7 +4862,7 @@ dependencies = [
 
 [[package]]
 name = "yahoo-search-mcp-provider"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "regex",
@@ -4874,7 +4874,7 @@ dependencies = [
 
 [[package]]
 name = "yahoo-search-mcp-server"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "reqwest",
