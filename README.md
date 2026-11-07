@@ -1,3 +1,5 @@
+このリポジトリは ZeroSearch_MCP（https://github.com/mouseos/ZeroSearch_MCP）へ統合され、アーカイブされました。今後の開発とリリースは統合版で行います。
+
 # Yahoo! JAPAN Search MCP
 
 Yahoo! JAPAN の検索をAIエージェントから使えるようにするMCPサーバー。**APIキー不要・アカウント不要・設定不要**。
